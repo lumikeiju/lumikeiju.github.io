@@ -1,0 +1,7 @@
+.cache/
+.venv/
+site/
+local-storage/
+.DS_Store
+lumikieju.github.io.code-workspace
+*.wip

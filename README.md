@@ -1,2 +1,9 @@
-# Lumikieju.github.io
-Apex repo for Lumikeiju.dev
+<!-- @format -->
+
+# lumikeiju.dev
+
+This repository contains the files used to create [lumikeiju.dev](https://lumikeiju.dev/) using [Zensical](https://zensical.org/).
+
+## Contributing
+
+This Wiki does not accept external contributions.
