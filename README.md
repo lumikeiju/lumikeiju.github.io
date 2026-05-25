@@ -6,4 +6,4 @@ This repository contains the files used to create [lumikeiju.dev](https://lumike
 
 ## Contributing
 
-This Wiki does not accept external contributions.
+This repository does not accept external contributions.
