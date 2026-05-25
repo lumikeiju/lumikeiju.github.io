@@ -1,7 +1,12 @@
+# Dev
 .cache/
 .venv/
 site/
+
+# Project
 local-storage/
-.DS_Store
 lumikieju.github.io.code-workspace
-*.wip
+
+# OS
+.DS_Store
+Thumbs.db
