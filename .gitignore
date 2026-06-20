@@ -1,12 +1,29 @@
-# Dev
-.cache/
-.venv/
-site/
+# Dependencies
+node_modules/
 
-# Project
+# Build outputs
+dist/
+.astro/
+*.tsbuildinfo
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Local / dev
 local-storage/
-lumikieju.github.io.code-workspace
+.cache/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Editor
+.vscode/settings.json
+*.code-workspace

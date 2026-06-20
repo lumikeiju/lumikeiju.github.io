@@ -1,0 +1,298 @@
+---
+/**
+ * Sidebar Rail template.
+ *
+ * Sticky left rail holds title, tagline, meta, and links. The right column is
+ * a scrollable long-form treatment: summary, then a vertical stack of
+ * full-width images with captions, like a portfolio case study.
+ */
+import type { ProjectProfile } from "../../data/project";
+import ThemeToggle from "../ThemeToggle.astro";
+import ExternalLinkIcon from "../ExternalLinkIcon.astro";
+import { isExternal, externalLinkAttrs } from "../../lib/links";
+import { withBasePath } from "../../lib/urls";
+
+type Props = {
+  project: ProjectProfile;
+};
+
+const { project } = Astro.props;
+const titleId = `tpl-${project.slug}-title`;
+const summaryId = `tpl-${project.slug}-summary`;
+const galleryId = `tpl-${project.slug}-gallery`;
+---
+
+<div class="topbar">
+  <a href={withBasePath("/")} class="back-link">← All projects</a>
+  <ThemeToggle />
+</div>
+
+<main id="main-content" class="shell">
+  <aside class="rail" aria-labelledby={titleId}>
+    <p class="eyebrow">Lumikeiju presents&hellip;</p>
+    <h1 id={titleId}>{project.name}</h1>
+    <p class="rail__tagline">{project.tagline}</p>
+
+    {
+      project.stats.length > 0 && (
+        <dl class="rail__meta">
+          {project.stats.map((stat) => (
+            <div>
+              <dt>{stat.label}</dt>
+              <dd>{stat.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )
+    }
+
+    {
+      project.links.length > 0 && (
+        <ul class="rail__links" aria-label="Project links">
+          {project.links.map((link) => (
+            <li>
+              <a
+                class={
+                  link.primary ? "rail__link rail__link--primary" : "rail__link"
+                }
+                href={link.href}
+                {...externalLinkAttrs(link.href)}
+              >
+                <span>
+                  {link.label}
+                  {isExternal(link.href) && (
+                    <>
+                      <ExternalLinkIcon />
+                      <span class="sr-only"> (opens in a new tab)</span>
+                    </>
+                  )}
+                </span>
+                <small>{link.description}</small>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </aside>
+
+  <article class="story">
+    {
+      project.summary.length > 0 && (
+        <section aria-labelledby={summaryId}>
+          <p class="eyebrow">Overview</p>
+          <h2 id={summaryId}>What this project is</h2>
+          {project.summary.map((p) => (
+            <p class="story__p">{p}</p>
+          ))}
+        </section>
+      )
+    }
+
+    {
+      project.images.length > 0 && (
+        <section aria-labelledby={galleryId}>
+          <p class="eyebrow">Gallery</p>
+          <h2 id={galleryId}>Images</h2>
+          {project.images.map((img) => (
+            <figure class="shot">
+              <img
+                class="shot__img shot__img--light"
+                src={withBasePath(img.srcLight ?? img.src)}
+                alt={img.alt}
+                width={img.width}
+                height={img.height}
+                loading="lazy"
+                decoding="async"
+              />
+              <img
+                class="shot__img shot__img--dark"
+                src={withBasePath(img.srcDark ?? img.src)}
+                alt={img.alt}
+                width={img.width}
+                height={img.height}
+                loading="lazy"
+                decoding="async"
+              />
+              {img.caption && <figcaption>{img.caption}</figcaption>}
+            </figure>
+          ))}
+        </section>
+      )
+    }
+  </article>
+</main>
+
+<style>
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px clamp(16px, 3vw, 32px) 0;
+  }
+
+  .eyebrow {
+    margin: 0 0 12px;
+    color: var(--color-accent);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .shell {
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+    width: min(1280px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 16px 0 64px;
+  }
+  @media (max-width: 900px) {
+    .shell {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .rail {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    padding: clamp(20px, 3vw, 32px);
+    border-right: 1px solid var(--color-line);
+  }
+  @media (max-width: 900px) {
+    .rail {
+      position: static;
+      border-right: 0;
+      border-bottom: 1px solid var(--color-line);
+    }
+  }
+  .rail h1 {
+    margin: 0;
+    font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+    line-height: 1.05;
+    overflow-wrap: break-word;
+    max-width: none;
+  }
+  .rail__tagline {
+    margin: 16px 0 24px;
+    color: var(--color-muted);
+    line-height: 1.55;
+    font-size: 1rem;
+  }
+  .rail__meta {
+    margin: 0 0 24px;
+    padding: 16px 0;
+    border-top: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    display: grid;
+    gap: 12px;
+  }
+  .rail__meta div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .rail__meta dt {
+    color: var(--color-muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 800;
+  }
+  .rail__meta dd {
+    margin: 0;
+    font-weight: 800;
+    font-size: 1rem;
+  }
+
+  .rail__links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+  .rail__link {
+    display: block;
+    padding: 12px 14px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    text-decoration: none;
+    color: var(--color-ink);
+  }
+  .rail__link:hover {
+    border-color: var(--color-primary);
+  }
+  .rail__link span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 800;
+  }
+  .rail__link small {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  .rail__link--primary {
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+    border-color: transparent;
+  }
+  .rail__link--primary:hover {
+    background: var(--color-primary-strong);
+  }
+  .rail__link--primary small {
+    color: rgb(255 255 255 / 80%);
+  }
+
+  .story {
+    padding: clamp(20px, 4vw, 48px);
+  }
+  .story h2 {
+    margin: 0 0 20px;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+  }
+  .story section + section {
+    margin-top: 56px;
+  }
+  .story__p {
+    margin: 0 0 18px;
+    color: var(--color-muted);
+    font-size: 1.08rem;
+    line-height: 1.75;
+    max-width: 65ch;
+  }
+
+  .shot {
+    margin: 0 0 32px;
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    box-shadow: 0 18px 48px var(--color-shadow);
+  }
+  .shot__img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: min(600px, 70vh);
+    object-fit: contain;
+  }
+  :global([data-theme="dark"]) .shot__img--light,
+  :global([data-theme="light"]) .shot__img--dark {
+    display: none;
+  }
+  .shot figcaption {
+    padding: 12px 16px;
+    color: var(--color-muted);
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-line);
+    font-size: 0.95rem;
+  }
+</style>

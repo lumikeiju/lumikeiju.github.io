@@ -1,0 +1,411 @@
+---
+/**
+ * Bento Grid template.
+ *
+ * 12-column grid of mixed-size tiles: title block, lead image, stat tiles,
+ * summary tile, two media tiles, and a wide references tile.
+ * Information-dense and scannable.
+ */
+import type { ProjectProfile } from "../../data/project";
+import ThemeToggle from "../ThemeToggle.astro";
+import ExternalLinkIcon from "../ExternalLinkIcon.astro";
+import { isExternal, externalLinkAttrs } from "../../lib/links";
+import { withBasePath } from "../../lib/urls";
+
+type Props = {
+  project: ProjectProfile;
+};
+
+const { project } = Astro.props;
+const primary = project.links.find((link) => link.primary) ?? project.links[0];
+const lead = project.images[0];
+const second = project.images[1];
+const third = project.images[2];
+const titleId = `tpl-${project.slug}-title`;
+const summaryId = `tpl-${project.slug}-summary`;
+const linksId = `tpl-${project.slug}-links`;
+---
+
+<div class="topbar">
+  <a href={withBasePath("/")} class="back-link">← All projects</a>
+  <ThemeToggle />
+</div>
+
+<main id="main-content" class="shell">
+  <div class="bento">
+    <section class="tile tile--title" aria-labelledby={titleId}>
+      <p class="eyebrow">Lumikeiju presents&hellip;</p>
+      <h1 id={titleId}>{project.name}</h1>
+      <p class="tagline">{project.tagline}</p>
+      {
+        primary && (
+          <a
+            class="btn btn--primary"
+            href={primary.href}
+            {...externalLinkAttrs(primary.href)}
+          >
+            {primary.label}
+            {isExternal(primary.href) && (
+              <>
+                <ExternalLinkIcon />
+                <span class="sr-only"> (opens in a new tab)</span>
+              </>
+            )}
+          </a>
+        )
+      }
+    </section>
+
+    {
+      lead && (
+        <figure class="tile tile--lead">
+          <img
+            class="tile__img tile__img--light"
+            src={withBasePath(lead.srcLight ?? lead.src)}
+            alt={lead.alt}
+            width={lead.width}
+            height={lead.height}
+            loading="eager"
+            decoding="async"
+          />
+          <img
+            class="tile__img tile__img--dark"
+            src={withBasePath(lead.srcDark ?? lead.src)}
+            alt={lead.alt}
+            width={lead.width}
+            height={lead.height}
+            loading="eager"
+            decoding="async"
+          />
+          {lead.caption && <figcaption>{lead.caption}</figcaption>}
+        </figure>
+      )
+    }
+
+    {
+      project.stats.map((stat) => (
+        <section class="tile tile--stat">
+          <p class="stat__label">{stat.label}</p>
+          <p class="stat__value">{stat.value}</p>
+        </section>
+      ))
+    }
+
+    {
+      project.summary.length > 0 && (
+        <section class="tile tile--summary" aria-labelledby={summaryId}>
+          <p class="eyebrow">Overview</p>
+          <h2 id={summaryId}>What this project is</h2>
+          {project.summary.map((p) => (
+            <p>{p}</p>
+          ))}
+        </section>
+      )
+    }
+
+    {
+      second && (
+        <figure class="tile tile--media">
+          <img
+            class="tile__img tile__img--light"
+            src={withBasePath(second.srcLight ?? second.src)}
+            alt={second.alt}
+            width={second.width}
+            height={second.height}
+            loading="lazy"
+            decoding="async"
+          />
+          <img
+            class="tile__img tile__img--dark"
+            src={withBasePath(second.srcDark ?? second.src)}
+            alt={second.alt}
+            width={second.width}
+            height={second.height}
+            loading="lazy"
+            decoding="async"
+          />
+          {second.caption && <figcaption>{second.caption}</figcaption>}
+        </figure>
+      )
+    }
+
+    {
+      third && (
+        <figure class="tile tile--media tile--media--wide">
+          <img
+            class="tile__img tile__img--light"
+            src={withBasePath(third.srcLight ?? third.src)}
+            alt={third.alt}
+            width={third.width}
+            height={third.height}
+            loading="lazy"
+            decoding="async"
+          />
+          <img
+            class="tile__img tile__img--dark"
+            src={withBasePath(third.srcDark ?? third.src)}
+            alt={third.alt}
+            width={third.width}
+            height={third.height}
+            loading="lazy"
+            decoding="async"
+          />
+          {third.caption && <figcaption>{third.caption}</figcaption>}
+        </figure>
+      )
+    }
+
+    {
+      project.links.length > 0 && (
+        <section class="tile tile--links" aria-labelledby={linksId}>
+          <p class="eyebrow">References</p>
+          <h2 id={linksId}>Continue from here</h2>
+          <ul>
+            {project.links.map((link) => (
+              <li>
+                <a href={link.href} {...externalLinkAttrs(link.href)}>
+                  <span>
+                    {link.label}
+                    {isExternal(link.href) && (
+                      <>
+                        <ExternalLinkIcon />
+                        <span class="sr-only"> (opens in a new tab)</span>
+                      </>
+                    )}
+                  </span>
+                  <small>{link.description}</small>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </div>
+</main>
+
+<style>
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px clamp(16px, 3vw, 32px) 0;
+  }
+
+  .shell {
+    width: min(1280px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 16px 0 64px;
+  }
+
+  .eyebrow {
+    margin: 0 0 10px;
+    color: var(--color-accent);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+  }
+
+  .tile {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    box-shadow: 0 18px 48px var(--color-shadow);
+    padding: clamp(18px, 2.4vw, 28px);
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .tile--title {
+    grid-column: span 7;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .tile--title h1 {
+    margin: 0;
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    line-height: 1.02;
+  }
+  .tagline {
+    margin: 16px 0 20px;
+    color: var(--color-muted);
+    font-size: clamp(1rem, 1.4vw, 1.15rem);
+    line-height: 1.55;
+    max-width: 50ch;
+  }
+  .btn {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: var(--radius);
+    font-weight: 800;
+    text-decoration: none;
+  }
+  .btn--primary {
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+  }
+  .btn--primary:hover {
+    background: var(--color-primary-strong);
+  }
+
+  .tile--lead {
+    grid-column: span 5;
+    padding: 0;
+    position: relative;
+    background: var(--color-media-canvas);
+    aspect-ratio: 4 / 3;
+  }
+  .tile--lead .tile__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .tile--lead figcaption {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    padding: 8px 10px;
+    color: var(--color-media-ink);
+    background: var(--color-overlay-strong);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+  }
+
+  .tile--stat {
+    grid-column: span 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .stat__label {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .stat__value {
+    margin: 6px 0 0;
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
+    font-weight: 800;
+  }
+
+  .tile--summary {
+    grid-column: span 7;
+  }
+  .tile--summary h2 {
+    margin: 0 0 12px;
+    font-size: clamp(1.5rem, 2.6vw, 2rem);
+  }
+  .tile--summary p {
+    margin: 0 0 14px;
+    color: var(--color-muted);
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+  .tile--summary p:last-child {
+    margin-bottom: 0;
+  }
+
+  .tile--media {
+    grid-column: span 5;
+    padding: 0;
+    position: relative;
+    background: var(--color-media-canvas);
+    aspect-ratio: 16 / 10;
+  }
+  .tile--media--wide {
+    grid-column: span 12;
+    aspect-ratio: 21 / 9;
+  }
+  .tile--media .tile__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .tile--media figcaption {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    padding: 8px 10px;
+    color: var(--color-media-ink);
+    background: var(--color-overlay-strong);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+  }
+
+  :global([data-theme="dark"]) .tile__img--light,
+  :global([data-theme="light"]) .tile__img--dark {
+    display: none;
+  }
+
+  .tile--links {
+    grid-column: span 12;
+  }
+  .tile--links h2 {
+    margin: 0 0 16px;
+    font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+  }
+  .tile--links ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .tile--links a {
+    display: block;
+    padding: 14px 16px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    background: var(--color-surface-soft);
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  .tile--links a:hover {
+    border-color: var(--color-primary);
+  }
+  .tile--links span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 800;
+  }
+  .tile--links small {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-muted);
+    font-size: 0.88rem;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 900px) {
+    .tile--title,
+    .tile--lead,
+    .tile--summary,
+    .tile--media,
+    .tile--links {
+      grid-column: span 12;
+    }
+    .tile--stat {
+      grid-column: span 6;
+    }
+  }
+</style>

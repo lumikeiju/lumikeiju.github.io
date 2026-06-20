@@ -1,0 +1,16 @@
+---
+import SiteHero from "../components/SiteHero.astro";
+import ProjectGrid from "../components/ProjectGrid.astro";
+import SiteLayout from "../layouts/SiteLayout.astro";
+import { registry } from "../data/registry";
+import { siteName } from "../data/site";
+
+const tagline = "Personal home page for Lumikeiju's projects.";
+---
+
+<SiteLayout title={siteName} description={tagline}>
+  <main id="main-content" class="page-shell">
+    <SiteHero tagline={tagline} />
+    <ProjectGrid entries={registry} />
+  </main>
+</SiteLayout>

@@ -1,0 +1,94 @@
+/*
+ * Theme configuration for the Peruskivi template.
+ *
+ * Override any of these CSS custom properties to re-skin a project page.
+ * Light and dark palettes are kept side by side so a project only has to
+ * touch the brand color, radius, fonts, or any individual token to retheme.
+ *
+ * Theme selection
+ * - `:root` holds the brand-agnostic knobs (fonts, radius, shadow).
+ * - `[data-theme="dark"]` and `[data-theme="light"]` set the palette.
+ * - The inline init script in the layout sets `data-theme` on <html> before
+ *   first paint based on saved preference, then `prefers-color-scheme`,
+ *   then dark by default.
+ */
+
+:root {
+  /* Brand color — change this to retheme the whole site.
+   * Chosen so white text on `--brand` clears WCAG 2.2 AA 4.5:1 contrast
+   * (#0066cc ≈ 5.6:1 on white). Keep any override at or below this lightness
+   * to preserve accessible primary buttons in both themes.
+   */
+  --brand: #0066cc;
+  --brand-strong: #004c99;
+  --brand-contrast: #ffffff;
+
+  /* Accent (used for eyebrows). */
+  --accent: #ff5e3a;
+  --accent-soft: #ffd9cd;
+
+  /* Shape and motion. */
+  --radius: 8px;
+  --shadow-soft: 0 18px 48px rgb(0 0 0 / 24%);
+
+  /* Typography. */
+  --font-sans:
+    "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", ui-sans-serif,
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono:
+    "Atkinson Hyperlegible Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  /* Palette tokens — defaulted to dark; overridden by `[data-theme="light"]`. */
+  --color-canvas: #0b1220;
+  --color-surface: #121b2e;
+  --color-surface-soft: rgb(255 255 255 / 4%);
+  --color-ink: #eef2f8;
+  --color-muted: #97a3b6;
+  --color-line: #233048;
+  --color-primary: var(--brand);
+  --color-primary-strong: var(--brand-strong);
+  --color-primary-contrast: var(--brand-contrast);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-shadow: rgb(0 0 0 / 50%);
+  --color-overlay-strong: rgb(0 0 0 / 68%);
+  --color-overlay-soft: rgb(0 0 0 / 24%);
+  --color-media-canvas: #000000;
+  --color-media-ink: #ffffff;
+  --color-media-control-border: rgb(255 255 255 / 36%);
+  --color-media-control-surface: rgb(0 0 0 / 54%);
+  --color-media-dot-border: rgb(255 255 255 / 60%);
+
+  /* Ambient gradient tint. */
+  --bg-tint-a: rgb(0 127 255 / 14%);
+  --bg-tint-b: rgb(255 94 58 / 10%);
+
+  color-scheme: dark;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-canvas: #0b1220;
+  --color-surface: #121b2e;
+  --color-surface-soft: rgb(255 255 255 / 4%);
+  --color-ink: #eef2f8;
+  --color-muted: #97a3b6;
+  --color-line: #233048;
+  --color-shadow: rgb(0 0 0 / 50%);
+  --bg-tint-a: rgb(0 127 255 / 14%);
+  --bg-tint-b: rgb(255 94 58 / 10%);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --color-canvas: #f6f7fb;
+  --color-surface: #ffffff;
+  --color-surface-soft: rgb(0 0 0 / 3%);
+  --color-ink: #0f172a;
+  --color-muted: #4b5668;
+  --color-line: #dbe1ec;
+  --color-shadow: rgb(15 23 42 / 12%);
+  --bg-tint-a: rgb(0 127 255 / 10%);
+  --bg-tint-b: rgb(255 94 58 / 8%);
+}

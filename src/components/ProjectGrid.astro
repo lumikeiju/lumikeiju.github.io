@@ -1,0 +1,159 @@
+---
+import type { RegistryEntry } from "../data/registry";
+import ExternalLinkIcon from "./ExternalLinkIcon.astro";
+import { externalLinkAttrs, isExternal } from "../lib/links";
+
+type Props = {
+  entries: RegistryEntry[];
+};
+
+const { entries } = Astro.props;
+
+const resolvePrimaryHref = (entry: RegistryEntry): string | undefined => {
+  if (entry.status === "coming-soon") return undefined;
+  if (entry.kind === "internal") return `/${entry.slug}/`;
+  return entry.href;
+};
+---
+
+<section class="section projects" aria-labelledby="projects-title">
+  <div>
+    <p class="eyebrow">Projects</p>
+    <h2 id="projects-title">Explore</h2>
+  </div>
+  <ul class="project-grid" role="list">
+    {
+      entries.map((entry) => {
+        const primaryHref = resolvePrimaryHref(entry);
+        const primaryIsExternal = primaryHref ? isExternal(primaryHref) : false;
+        return (
+          <li class={`project-card project-card--${entry.kind}`}>
+            <div class="project-card__header">
+              <h3 class="project-card__title">
+                {primaryHref ? (
+                  <a href={primaryHref} {...externalLinkAttrs(primaryHref)}>
+                    {entry.name}
+                    {primaryIsExternal && (
+                      <Fragment>
+                        <ExternalLinkIcon />
+                        <span class="sr-only"> (opens in a new tab)</span>
+                      </Fragment>
+                    )}
+                  </a>
+                ) : (
+                  <span>{entry.name}</span>
+                )}
+              </h3>
+              {entry.status === "coming-soon" && (
+                <span class="project-card__badge">Coming soon</span>
+              )}
+            </div>
+            <p class="project-card__tagline">{entry.tagline}</p>
+            {entry.repo && (
+              <p class="project-card__meta">
+                <a
+                  class="project-card__link"
+                  href={entry.repo}
+                  {...externalLinkAttrs(entry.repo)}
+                >
+                  GitHub
+                  <ExternalLinkIcon />
+                  <span class="sr-only"> (opens in a new tab)</span>
+                </a>
+              </p>
+            )}
+          </li>
+        );
+      })
+    }
+  </ul>
+</section>
+
+<style>
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .project-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px 22px;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+  }
+
+  .project-card--coming-soon {
+    opacity: 0.85;
+  }
+
+  .project-card__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .project-card__title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .project-card__title a {
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+
+  .project-card__title a:hover,
+  .project-card__title a:focus-visible {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+
+  .project-card__badge {
+    padding: 2px 8px;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    background: var(--color-surface-soft);
+    color: var(--color-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .project-card__tagline {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.98rem;
+    line-height: 1.5;
+  }
+
+  .project-card__meta {
+    margin: auto 0 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .project-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-primary);
+    text-decoration: none;
+  }
+
+  .project-card__link:hover,
+  .project-card__link:focus-visible {
+    text-decoration: underline;
+  }
+</style>
