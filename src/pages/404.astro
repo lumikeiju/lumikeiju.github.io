@@ -1,0 +1,28 @@
+---
+import SiteLayout from "../layouts/SiteLayout.astro";
+import { siteName } from "../data/site";
+
+const homeHref = import.meta.env.BASE_URL;
+---
+
+<SiteLayout
+  title={`Page not found | ${siteName}`}
+  description="The page you requested could not be found on lumikeiju.dev."
+  noindex
+>
+  <main id="main-content" class="page-shell">
+    <header class="hero" aria-labelledby="notfound-title">
+      <div class="hero__content">
+        <p class="eyebrow">404</p>
+        <h1 id="notfound-title">Page not found</h1>
+        <p class="hero__tagline">
+          The page you were looking for is not here. It may have moved, or the
+          link may be wrong.
+        </p>
+        <div class="hero__actions">
+          <a class="button button--primary" href={homeHref}>Back to home</a>
+        </div>
+      </div>
+    </header>
+  </main>
+</SiteLayout>

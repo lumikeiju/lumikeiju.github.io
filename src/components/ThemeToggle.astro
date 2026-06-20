@@ -1,0 +1,81 @@
+---
+/**
+ * Theme toggle button. The initial state is set by the inline script in
+ * `SiteLayout.astro`; this just flips between light and dark and persists
+ * the choice to localStorage under the shared `themeStorageKey`.
+ */
+import { themeStorageKey } from "../data/site";
+---
+
+<button
+  type="button"
+  class="theme-toggle"
+  data-theme-toggle
+  aria-label="Switch to light theme"
+  aria-pressed="false"
+>
+  <svg
+    class="theme-toggle__icon theme-toggle__icon--sun"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <circle cx="12" cy="12" r="4"></circle>
+    <path
+      d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+    ></path>
+  </svg>
+  <svg
+    class="theme-toggle__icon theme-toggle__icon--moon"
+    viewBox="0 0 24 24"
+    aria-hidden="true"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+  </svg>
+  <span class="theme-toggle__label theme-toggle__label--sun">Light</span>
+  <span class="theme-toggle__label theme-toggle__label--moon">Dark</span>
+</button>
+
+<script is:inline define:vars={{ STORAGE_KEY: themeStorageKey }}>
+  const root = document.documentElement;
+
+  const applyTheme = (theme) => {
+    root.setAttribute("data-theme", theme);
+    syncButtons(theme);
+  };
+
+  const currentTheme = () =>
+    root.getAttribute("data-theme") === "light" ? "light" : "dark";
+
+  const syncButtons = (theme) => {
+    const next = theme === "dark" ? "light" : "dark";
+    document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+      button.setAttribute("aria-pressed", theme === "light" ? "true" : "false");
+      button.setAttribute("aria-label", `Switch to ${next} theme`);
+    });
+  };
+
+  // Sync initial state set by the no-FOUC script in the layout.
+  syncButtons(currentTheme());
+
+  document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const next = currentTheme() === "dark" ? "light" : "dark";
+      applyTheme(next);
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch (_) {
+        /* Ignore storage errors (private mode, etc.). */
+      }
+    });
+  });
+</script>

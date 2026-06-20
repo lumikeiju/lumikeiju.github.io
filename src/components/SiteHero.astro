@@ -1,0 +1,23 @@
+---
+import { siteName } from "../data/site";
+import ThemeToggle from "./ThemeToggle.astro";
+
+type Props = {
+  tagline: string;
+};
+
+const { tagline } = Astro.props;
+---
+
+<header class="hero" aria-labelledby="site-title">
+  <div class="hero__content">
+    <p class="eyebrow">Lumikeiju presents...</p>
+    <h1 id="site-title">{siteName}</h1>
+    <p class="hero__tagline">{tagline}</p>
+  </div>
+  <div class="hero__stats">
+    <div class="hero__stats__row hero__stats__toggle">
+      <ThemeToggle />
+    </div>
+  </div>
+</header>

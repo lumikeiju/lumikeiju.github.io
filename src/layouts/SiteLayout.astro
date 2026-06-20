@@ -1,0 +1,179 @@
+---
+import "../styles/global.css";
+import type { ProjectProfile } from "../data/project";
+import { siteName, siteThemeColor, themeStorageKey } from "../data/site";
+import { absoluteUrl } from "../lib/urls";
+
+type Props = {
+  title: string;
+  description: string;
+  /** When provided, JSON-LD describes this specific project. */
+  project?: ProjectProfile;
+  /** Optional override for the canonical URL. Defaults to the current page. */
+  canonical?: string;
+  /** Optional override for the social preview image. Defaults to `project.ogImage`. */
+  ogImage?: string;
+  /** When true, emits a `<meta name="robots" content="noindex">` tag. */
+  noindex?: boolean;
+  /** When true (default), emits JSON-LD structured data. */
+  structuredData?: boolean;
+};
+
+const {
+  title,
+  description,
+  project,
+  canonical,
+  ogImage,
+  noindex,
+  structuredData = true
+} = Astro.props;
+
+const themeColor = project?.themeColor ?? siteThemeColor;
+const llmsHref = project
+  ? `${import.meta.env.BASE_URL}${project.slug}/llms.txt`
+  : `${import.meta.env.BASE_URL}llms.txt`;
+
+// Build a canonical URL safely. `Astro.site` comes from `SITE_URL` in astro.config.mjs.
+const canonicalHref = canonical
+  ? absoluteUrl(canonical, Astro.site)
+  : Astro.site
+    ? new URL(Astro.url.pathname, Astro.site).href
+    : Astro.url.pathname;
+
+// Resolve the social preview image to an absolute URL when possible.
+const resolvedOgImage = ogImage ?? project?.ogImage;
+const ogImageHref = resolvedOgImage
+  ? absoluteUrl(resolvedOgImage, Astro.site)
+  : undefined;
+
+// Build JSON-LD. Skipped on `noindex` pages (e.g. 404).
+let jsonLdText: string | null = null;
+if (structuredData && !noindex) {
+  if (project) {
+    const docsLink = project.links.find((link) => link.kind === "docs");
+    const repoLink = project.links.find((link) => link.kind === "repository");
+    const sameAs = [docsLink?.href, repoLink?.href].filter(
+      (href): href is string => Boolean(href)
+    );
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: `${project.name} | ${siteName}`,
+      url: canonicalHref,
+      description: project.tagline,
+      publisher: {
+        "@type": "Person",
+        name: siteName,
+        url: "https://lumikeiju.dev"
+      },
+      ...(ogImageHref ? { image: ogImageHref } : {}),
+      ...(sameAs.length > 0 ? { sameAs } : {})
+    };
+    jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
+  } else {
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: siteName,
+      url: canonicalHref,
+      description,
+      publisher: {
+        "@type": "Person",
+        name: siteName,
+        url: "https://lumikeiju.dev"
+      },
+      ...(ogImageHref ? { image: ogImageHref } : {})
+    };
+    jsonLdText = JSON.stringify(jsonLd).replace(/</g, "\\u003c");
+  }
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="theme-color" content={themeColor} />
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="canonical" href={canonicalHref} />
+    <link
+      rel="icon"
+      href={`${import.meta.env.BASE_URL}favicon.png`}
+      type="image/png"
+    />
+    <link
+      rel="alternate"
+      type="text/markdown"
+      title="LLM-friendly project summary"
+      href={llmsHref}
+    />
+
+    <!-- Atkinson Hyperlegible Next + Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@200..800&family=Atkinson+Hyperlegible+Mono:wght@200..800&display=swap"
+    />
+
+    <title>{title}</title>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalHref} />
+    {ogImageHref && <meta property="og:image" content={ogImageHref} />}
+
+    <!-- Twitter -->
+    <meta
+      name="twitter:card"
+      content={ogImageHref ? "summary_large_image" : "summary"}
+    />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {ogImageHref && <meta name="twitter:image" content={ogImageHref} />}
+
+    {
+      jsonLdText && (
+        <script type="application/ld+json" set:html={jsonLdText} is:inline />
+      )
+    }
+
+    <!--
+      No-FOUC theme init. Sets `data-theme` on <html> before first paint.
+      Order: saved preference -> system preference -> dark default.
+    -->
+    <script is:inline define:vars={{ storageKey: themeStorageKey }}>
+      (function () {
+        try {
+          var stored = localStorage.getItem(storageKey);
+          if (stored === "light" || stored === "dark") {
+            document.documentElement.setAttribute("data-theme", stored);
+            return;
+          }
+        } catch (_) {
+          /* Ignore storage errors. */
+        }
+        var prefersLight =
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: light)").matches;
+        document.documentElement.setAttribute(
+          "data-theme",
+          prefersLight ? "light" : "dark"
+        );
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,399 @@
+---
+/**
+ * Editorial Split template.
+ *
+ * Two-column hero: title, tagline, meta and CTAs on the left; tall lead
+ * image on the right. Summary in a moderate-width panel. Remaining gallery
+ * images render as a horizontally scrolling thumbnail strip below.
+ */
+import type { ProjectProfile } from "../../data/project";
+import ThemeToggle from "../ThemeToggle.astro";
+import ExternalLinkIcon from "../ExternalLinkIcon.astro";
+import { isExternal, externalLinkAttrs } from "../../lib/links";
+import { withBasePath } from "../../lib/urls";
+
+type Props = {
+  project: ProjectProfile;
+};
+
+const { project } = Astro.props;
+const primary = project.links.find((link) => link.primary) ?? project.links[0];
+const secondary = project.links.filter((link) => link !== primary);
+const lead = project.images[0];
+const rest = project.images.slice(1);
+const titleId = `tpl-${project.slug}-title`;
+const summaryId = `tpl-${project.slug}-summary`;
+const galleryId = `tpl-${project.slug}-gallery`;
+---
+
+<main id="main-content" class="shell">
+  <div class="topbar">
+    <a href={withBasePath("/")} class="back-link">← All projects</a>
+    <ThemeToggle />
+  </div>
+
+  <header class="hero" aria-labelledby={titleId}>
+    <div class="hero__copy">
+      <p class="eyebrow">Lumikeiju presents&hellip;</p>
+      <h1 id={titleId}>{project.name}</h1>
+      <p class="tagline">{project.tagline}</p>
+      {
+        project.stats.length > 0 && (
+          <ul class="meta" aria-label="Project metadata">
+            {project.stats.map((stat) => (
+              <li>
+                <span class="meta__label">{stat.label}</span>
+                <span class="meta__value">{stat.value}</span>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+      {
+        project.links.length > 0 && (
+          <div class="cta" aria-label="Primary project links">
+            {primary && (
+              <a
+                class="btn btn--primary"
+                href={primary.href}
+                {...externalLinkAttrs(primary.href)}
+              >
+                {primary.label}
+                {isExternal(primary.href) && (
+                  <>
+                    <ExternalLinkIcon />
+                    <span class="sr-only"> (opens in a new tab)</span>
+                  </>
+                )}
+              </a>
+            )}
+            {secondary.map((link) => (
+              <a
+                class="btn btn--ghost"
+                href={link.href}
+                {...externalLinkAttrs(link.href)}
+              >
+                {link.label}
+                {isExternal(link.href) && (
+                  <>
+                    <ExternalLinkIcon />
+                    <span class="sr-only"> (opens in a new tab)</span>
+                  </>
+                )}
+              </a>
+            ))}
+          </div>
+        )
+      }
+    </div>
+    {
+      lead && (
+        <figure class="hero__media">
+          <img
+            class="hero__img hero__img--light"
+            src={withBasePath(lead.srcLight ?? lead.src)}
+            alt={lead.alt}
+            width={lead.width}
+            height={lead.height}
+            loading="eager"
+            decoding="async"
+          />
+          <img
+            class="hero__img hero__img--dark"
+            src={withBasePath(lead.srcDark ?? lead.src)}
+            alt={lead.alt}
+            width={lead.width}
+            height={lead.height}
+            loading="eager"
+            decoding="async"
+          />
+          {lead.caption && <figcaption>{lead.caption}</figcaption>}
+        </figure>
+      )
+    }
+  </header>
+
+  {
+    project.summary.length > 0 && (
+      <section class="prose" aria-labelledby={summaryId}>
+        <p class="eyebrow">Overview</p>
+        <h2 id={summaryId}>What this project is</h2>
+        <div class="prose__body">
+          {project.summary.map((p) => (
+            <p>{p}</p>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    rest.length > 0 && (
+      <section class="strip" aria-labelledby={galleryId}>
+        <div class="strip__head">
+          <p class="eyebrow">Gallery</p>
+          <h2 id={galleryId}>More views</h2>
+        </div>
+        <ol class="strip__track" role="list">
+          {rest.map((img) => (
+            <li class="strip__item">
+              <figure>
+                <img
+                  class="strip__img strip__img--light"
+                  src={withBasePath(img.srcLight ?? img.src)}
+                  alt={img.alt}
+                  width={img.width}
+                  height={img.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+                <img
+                  class="strip__img strip__img--dark"
+                  src={withBasePath(img.srcDark ?? img.src)}
+                  alt={img.alt}
+                  width={img.width}
+                  height={img.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+                {img.caption && <figcaption>{img.caption}</figcaption>}
+              </figure>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )
+  }
+</main>
+
+<style>
+  .shell {
+    width: min(1240px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 24px 0 64px;
+    display: grid;
+    gap: 32px;
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .eyebrow {
+    margin: 0 0 12px;
+    color: var(--color-accent);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: 32px;
+    align-items: stretch;
+  }
+  @media (max-width: 900px) {
+    .hero {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .hero__copy {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(24px, 4vw, 48px);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    box-shadow: 0 18px 48px var(--color-shadow);
+  }
+  .hero__copy h1 {
+    margin: 0;
+    font-size: clamp(2.6rem, 6.5vw, 5rem);
+    line-height: 1.02;
+    max-width: 12ch;
+  }
+  .tagline {
+    color: var(--color-muted);
+    font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+    line-height: 1.55;
+    margin: 20px 0 0;
+    max-width: 50ch;
+  }
+
+  .meta {
+    list-style: none;
+    margin: 28px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 12px;
+  }
+  .meta li {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    background: var(--color-surface-soft);
+  }
+  .meta__label {
+    display: block;
+    color: var(--color-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .meta__value {
+    display: block;
+    margin-top: 4px;
+    font-weight: 800;
+    font-size: 1.05rem;
+  }
+
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 28px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 18px;
+    border-radius: var(--radius);
+    font-weight: 800;
+    text-decoration: none;
+    border: 1px solid transparent;
+  }
+  .btn--primary {
+    background: var(--color-primary);
+    color: var(--color-primary-contrast);
+  }
+  .btn--primary:hover {
+    background: var(--color-primary-strong);
+  }
+  .btn--ghost {
+    border-color: var(--color-line);
+    color: var(--color-ink);
+    background: var(--color-surface);
+  }
+  .btn--ghost:hover {
+    border-color: var(--color-primary);
+  }
+
+  .hero__media {
+    margin: 0;
+    position: relative;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--color-media-canvas);
+    box-shadow: 0 18px 48px var(--color-shadow);
+  }
+  .hero__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 4 / 5;
+  }
+  :global([data-theme="dark"]) .hero__img--light,
+  :global([data-theme="light"]) .hero__img--dark {
+    display: none;
+  }
+  .hero__media figcaption {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    padding: 10px 12px;
+    color: var(--color-media-ink);
+    background: var(--color-overlay-strong);
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+  }
+
+  .prose {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    padding: clamp(24px, 4vw, 48px);
+    box-shadow: 0 18px 48px var(--color-shadow);
+  }
+  .prose h2 {
+    margin: 0 0 16px;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+  }
+  .prose__body {
+    display: grid;
+    gap: 16px;
+    max-width: 70ch;
+    color: var(--color-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+  .prose__body p {
+    margin: 0;
+  }
+
+  .strip {
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    padding: clamp(20px, 3vw, 32px);
+    box-shadow: 0 18px 48px var(--color-shadow);
+  }
+  .strip__head h2 {
+    margin: 0;
+    font-size: clamp(1.4rem, 2.4vw, 2rem);
+  }
+  .strip__track {
+    list-style: none;
+    margin: 24px 0 0;
+    padding: 4px 4px 16px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(360px, 60%);
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+  .strip__item {
+    scroll-snap-align: start;
+  }
+  .strip__item figure {
+    margin: 0;
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--color-media-canvas);
+    border: 1px solid var(--color-line);
+  }
+  .strip__img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+  :global([data-theme="dark"]) .strip__img--light,
+  :global([data-theme="light"]) .strip__img--dark {
+    display: none;
+  }
+  .strip__item figcaption {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    padding: 8px 10px;
+    color: var(--color-media-ink);
+    background: var(--color-overlay-strong);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+  }
+</style>

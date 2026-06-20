@@ -1,0 +1,24 @@
+---
+import SiteLayout from "../../layouts/SiteLayout.astro";
+import { templates, defaultTemplate } from "../../components/templates";
+import type { ProjectProfile } from "../../data/project";
+import { internalProjects, type InternalSlug } from "../../data/projects";
+import { siteName } from "../../data/site";
+
+export const getStaticPaths = () =>
+  (Object.keys(internalProjects) as InternalSlug[]).map((slug) => ({
+    params: { slug },
+    props: { project: internalProjects[slug] as ProjectProfile }
+  }));
+
+const { project } = Astro.props;
+const Template = templates[project.template ?? defaultTemplate];
+---
+
+<SiteLayout
+  title={`${project.name} | ${siteName}`}
+  description={project.tagline}
+  project={project}
+>
+  <Template project={project} />
+</SiteLayout>
