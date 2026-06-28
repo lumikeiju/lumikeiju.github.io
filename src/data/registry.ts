@@ -105,6 +105,16 @@ export const registry: RegistryEntry[] = [
   },
   {
     kind: "external",
+    name: "Tarralappu",
+    slug: "tarralappu",
+    tagline:
+      "Front-end for AI image generation via OpenRouter.",
+    repo: "https://github.com/lumikeiju/tarralappu",
+    href: "https://lumikeiju.dev/tarralappu/",
+    status: "live"
+  },
+  {
+    kind: "external",
     name: "Sidewalk Spider",
     slug: "sidewalk-spider",
     tagline:
